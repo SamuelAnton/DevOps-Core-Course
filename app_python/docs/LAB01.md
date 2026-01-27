@@ -13,49 +13,11 @@ I choosed `Flask ` because, how it was stated, it is lightweight and I have alre
 
 ## Best Practices Applied
 ### Clean Code Organization
-Clear code is easier to maintain and read. It is espessialy important if you work in group, so you can spend more time on work but not on understanding in what is going on in this part of code. Also after some time, when you return to your project, you will forgot almost all, so clean code will help you spend less time understanding it. Here are parts of the organization:
+Clear code is easier to maintain and read. It's especially important when working in teams, as it reduces time spent understanding code rather than working on it. Additionally, when returning to a project after some time, clean code helps you quickly understand what's happening.
 
-- Clear function names
-``` python
-def get_system_info():
-    ...
-
-def get_uptime():
-    ...
-```
-- Proper imports grouping
-``` python
-import os
-import socket
-import platform
-from datetime import datetime, timezone
-from flask import Flask, jsonfy, request
-import logging
-```
-- Comments only where needed
-```
-"""
-DevOps Info Service
-Main application module
-"""
-import os
-...
-
-# Configuration
-HOST = os.getenv('HOST', '0.0.0.0')
-...
-
-# Application start time
-start_time = datetime.now()
-...
-
-# Logging
-logging.basicConfig(
-...
-```
-- Follow PEP 8
-```
-# Function that collects system info
+**Implementation:**
+```python
+# Clear function names with descriptive docstrings
 def get_system_info():
     """Collect system information."""
     return {
@@ -65,7 +27,27 @@ def get_system_info():
         'python_version': platform.python_version()
     }
 
-# Function that gets total uptime of a service
+# Proper imports grouping
+import os
+import socket
+import platform
+from datetime import datetime, timezone
+from flask import Flask, jsonify, request
+import logging
+
+# Comments only where needed
+"""
+DevOps Info Service
+Main application module
+"""
+import os
+...
+
+# Configuration - clearly separated section
+HOST = os.getenv('HOST', '0.0.0.0')
+...
+
+# Following PEP 8 style guide
 def get_uptime():
     delta = datetime.now() - start_time
     seconds = int(delta.total_seconds())
@@ -77,8 +59,9 @@ def get_uptime():
     }
 ```
 
+
 ### Error Handling
-Error handling is crucial, because it will help you find that your service work correctly or not. Good error handling will also allow you to find mistakes in code when testing or using.
+Error handling is crucial because it helps ensure your service works correctly. Good error handling allows you to identify issues during testing and provides users with meaningful error messages.
 ``` python
 @app.errorhandler(404)
 def not_found(error):
@@ -96,7 +79,7 @@ def internal_error(error):
 ```
 
 ### Logging
-Logging is also crucial part of work. It will show you what is happening in the code: events occured, errors met and etc. It will help you to find out hidden mistakes and be sure that everything is working as it should.
+Logging is a crucial part of development. It shows what's happening in the code: events, errors, and other important information. This helps identify hidden issues and confirms that everything is working as expected.
 ``` python
 logging.basicConfig(
     level=logging.INFO,
@@ -109,13 +92,13 @@ logger.debug(f'Request: {request.method} {request.path}')
 ```
 
 ### Dependencies 
-It is good practice to collect all project dependencies in a special file, so it will be easier to maintain and download to different machine.
+t's good practice to collect all project dependencies in a dedicated file. This makes it easier to maintain the project and deploy it to different machines.
 ```
 Flask==3.1.0
 ```
 
 ### Git Ignore
-It is good practice not to push some junk files to your repo, so it will not mess everything up.
+It's good practice to exclude unnecessary files from your repository to keep it clean and organized.
 ```
 # Python
 __pycache__/
@@ -132,71 +115,137 @@ venv/
 ```
 
 ## API Documentation
-### GET /
+### GET / - Service Information
 
-### GET /health
+**Description**: Returns comprehensive service and system information including service metadata, system details, runtime statistics, and request information.
+
+**Request:**
+```bash
+curl http://localhost:5000/
+```
+
+**Response:**
+```bash
+{
+  "service": {
+    "name": "devops-info-service",
+    "version": "1.0.0",
+    "description": "DevOps course info service",
+    "framework": "Flask"
+  },
+  "system": {
+    "hostname": "my-laptop",
+    "platform": "Linux",
+    "platform_version": "Ubuntu 24.04",
+    "architecture": "x86_64",
+    "cpu_count": 8,
+    "python_version": "3.13.1"
+  },
+  "runtime": {
+    "uptime_seconds": 3600,
+    "uptime_human": "1 hour, 0 minutes",
+    "current_time": "2026-01-07T14:30:00.000Z",
+    "timezone": "UTC"
+  },
+  "request": {
+    "client_ip": "127.0.0.1",
+    "user_agent": "curl/7.81.0",
+    "method": "GET",
+    "path": "/"
+  },
+  "endpoints": [
+    {"path": "/", "method": "GET", "description": "Service information"},
+    {"path": "/health", "method": "GET", "description": "Health check"}
+  ]
+}
+```
+
+### GET /health - Health Check
+**Description:** Simple endpoint for service monitoring and health checks.
+
+**Request:**
+```bash
+curl http://localhost:5000/health
+```
+
+**Response:**
+```
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T14:30:00.000Z",
+  "uptime_seconds": 3600
+}
+```
 
 ### Testing
+#### Screenshots
+In the proper folder. You can find them there.
+#### Terminal output
 
+**Starting the application:**
+```
+2026-01-27 23:28:29,367 - __main__ - INFO - Application starting...
+2026-01-27 23:28:29,367 - __main__ - INFO - Running on http://0.0.0.0:5000
+2026-01-27 23:28:29,367 - __main__ - INFO - Debug mode: False
+```
 
-## Testing evidence
-### Screenshots
-### Terminal output
+**Testing GET / endpoint:**
+```bash
+$curl http://localhost:5000/ | python3 -m json.tool
+{
+    "endpoints": [
+        {
+            "description": "Service information",
+            "method": "GET",
+            "path": "/"
+        },
+        {
+            "description": "Health check",
+            "method": "GET",
+            "path": "/health"
+        }
+    ],
+    "request": {
+        "client_ip": "127.0.0.1",
+        "method": "GET",
+        "path": "/",
+        "user_agent": "curl/7.81.0"
+    },
+    "runtime": {
+        "current_time": "2026-01-27T20:35:29.676613Z",
+        "timezone": "UTC",
+        "uptime_human": "0 hours, 0 minutes",
+        "uptime_seconds": 9
+    },
+    "service": {
+        "description": "DevOps course info service",
+        "framework": "Flask",
+        "name": "devops-info-service",
+        "version": "1.0.0"
+    },
+    "system": {
+        "architecture": "x86_64",
+        "cpu_count": 2,
+        "hostname": "damir-VB",
+        "platform": "Linux",
+        "platform_version": "#89~22.04.2-Ubuntu SMP PREEMPT_DYNAMIC Wed Oct 29 10:45:25 UTC 2",
+        "python_version": "3.10.12"
+    }
+}
+```
+
+**Testing GET /health endpoint:**
+```bash
+$curl http://localhost:5000/health | python3 -m json.tool
+{
+    "status": "healthy",
+    "timestamp": "2026-01-27T20:37:22.664269Z",
+    "uptime_seconds": 7
+}
+```
 
 ## Challenges & Solutions
+For first week there were no significant challanges.
 
 ## GitHub Community
-### Why Stars Matter:
-
-#### Discovery & Bookmarking:
-
-- Stars help you bookmark interesting projects for later reference
-- Star count indicates project popularity and community trust
-- Starred repos appear in your GitHub profile, showing your interests
-
-#### Open Source Signal:
-
-- Stars encourage maintainers (shows appreciation)
-- High star count attracts more contributors
-- Helps projects gain visibility in GitHub search and recommendations
-
-#### Professional Context:
-
-- Shows you follow best practices and quality projects
-- Indicates awareness of industry tools and trends
-
-### Why Following Matters:
-
-#### Networking:
-
-- See what other developers are working on
-- Discover new projects through their activity
-- Build professional connections beyond the classroom
-
-#### Learning:
-
-- Learn from others' code and commits
-- See how experienced developers solve problems
-- Get inspiration for your own projects
-
-
-#### Collaboration:
-
-- Stay updated on classmates' work
-- Easier to find team members for future projects
-- Build a supportive learning community
-
-
-#### Career Growth:
-
-- Follow thought leaders in your technology stack
-- See trending projects in real-time
-- Build visibility in the developer community
-
-
-#### GitHub Best Practices:
-
-- Star repos you find useful (not spam)
-- Follow developers whose work interests you
-- Engage meaningfully with the community
-- Your GitHub activity shows employers your interests and involvement
+Starring repositories matters because it supports open-source projects by increasing their visibility and helping maintainers gauge community interest. Following developers helps build professional networks that foster collaboration, learning, and growth opportunities in team projects.

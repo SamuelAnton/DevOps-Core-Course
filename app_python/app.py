@@ -6,7 +6,7 @@ import os
 import socket
 import platform
 from datetime import datetime, timezone
-from flask import Flask, jsonfy, request
+from flask import Flask, jsonify, request
 import logging
 
 app = Flask(__name__)
@@ -26,9 +26,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-logger.info('Application starting...')
-logger.debug(f'Request: {request.method} {request.path}')
-
 
 # Function that collects system info
 def get_system_info():
@@ -36,7 +33,9 @@ def get_system_info():
     return {
         'hostname': socket.gethostname(),
         'platform': platform.system(),
+        'platform_version': platform.version(),
         'architecture': platform.machine(),
+        'cpu_count': os.cpu_count(),
         'python_version': platform.python_version()
     }
 
@@ -48,30 +47,61 @@ def get_uptime():
     minutes = (seconds % 3600) // 60
     return {
         'seconds': seconds,
-        'human': f"{hours} hours, {minutes} minutes"
+        'human': f"{hours} hour{'s' if hours != 1 else ''}, {minutes} minute{'s' if minutes != 1 else ''}"
     }
-
-# Request information in Flask
-request.remote_addr  # Client IP
-request.headers.get('User-Agent')  # User agent
-request.method  # HTTP method
-request.path  # Request path
 
 
 # API Endpoints
-
 # Main - service and system information
 @app.route('/')
 def index():
     """Main endpoint - service and system information."""
-    # Implementation
+    # Collect all required information
+    system_info = get_system_info()
+    uptime_info = get_uptime()
+    
+    response = {
+        "service": {
+            "name": "devops-info-service",
+            "version": "1.0.0",
+            "description": "DevOps course info service",
+            "framework": "Flask"
+        },
+        "system": {
+            "hostname": system_info['hostname'],
+            "platform": system_info['platform'],
+            "platform_version": system_info['platform_version'],
+            "architecture": system_info['architecture'],
+            "cpu_count": system_info['cpu_count'],
+            "python_version": system_info['python_version']
+        },
+        "runtime": {
+            "uptime_seconds": uptime_info['seconds'],
+            "uptime_human": uptime_info['human'],
+            "current_time": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
+            "timezone": "UTC"
+        },
+        "request": {
+            "client_ip": request.remote_addr,
+            "user_agent": request.headers.get('User-Agent', 'Unknown'),
+            "method": request.method,
+            "path": request.path
+        },
+        "endpoints": [
+            {"path": "/", "method": "GET", "description": "Service information"},
+            {"path": "/health", "method": "GET", "description": "Health check"}
+        ]
+    }
+    
+    return jsonify(response)
+
 
 # Health check
 @app.route('/health')
 def health():
     return jsonify({
         'status': 'healthy',
-        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
         'uptime_seconds': get_uptime()['seconds']
     })
 
@@ -90,3 +120,11 @@ def internal_error(error):
         'error': 'Internal Server Error',
         'message': 'An unexpected error occurred'
     }), 500
+
+
+# Start of the service
+if __name__ == '__main__':
+    logger.info('Application starting...')
+    logger.info(f'Running on http://{HOST}:{PORT}')
+    logger.info(f'Debug mode: {DEBUG}')
+    app.run(host=HOST, port=PORT, debug=DEBUG)
