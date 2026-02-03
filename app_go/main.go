@@ -178,7 +178,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Get configuration from environment variables
 	host := getEnv("HOST", "0.0.0.0")
-	port := getEnv("PORT", "8080")
+	port := getEnv("PORT", "5000")
 	debug := getEnv("DEBUG", "false")
 
 	// Set up routes

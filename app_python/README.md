@@ -80,3 +80,30 @@ HOST=127.0.0.1 PORT=3000 python app.py
 | **Host** | 0.0.0.0 | IP of the service |
 | **Port** | 5000 | Port of the service |
 | **Debug** | False | Debug mode enabeled |
+
+# Docker
+This application is containerized and ready for deployment using Docker.
+
+## Building the Image Locally
+To build the Docker image from source:
+```sh
+# Navigate to the application directory
+cd app
+
+# Build the image with a tag
+docker build -t <image-name>:<tag> .
+```
+
+## Running the Container
+To run the application in a container:
+```sh
+# Basic run with port mapping
+docker run -d -p <host-port>:<container-port> <image-name>:<tag>
+```
+
+## Pulling from Docker Hub
+The image is available on Docker Hub and can be pulled directly:
+```sh
+# Pull the latest version
+docker pull <dockerhub-username>/<image-name>:latest
+```
