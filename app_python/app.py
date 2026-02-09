@@ -39,12 +39,14 @@ def get_system_info():
         'python_version': platform.python_version()
     }
 
+
 # Function that gets total uptime of a service
 def get_uptime():
     delta = datetime.now() - start_time
     seconds = int(delta.total_seconds())
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
+    human = f"{hours} hour{'s' if hours != 1 else ''}, {minutes} minute{'s' if minutes != 1 else ''}"
     return {
         'seconds': seconds,
         'human': f"{hours} hour{'s' if hours != 1 else ''}, {minutes} minute{'s' if minutes != 1 else ''}"
