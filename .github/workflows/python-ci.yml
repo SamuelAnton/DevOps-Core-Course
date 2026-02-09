@@ -2,7 +2,7 @@ name: Python build and test
 
 on:
   push:
-    branches: [ main, lab03 ]
+    branches: [ lab03 ]
   pull_request:
     branches: [ main ]
   release:
