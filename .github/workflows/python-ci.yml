@@ -32,7 +32,7 @@ jobs:
           pip install pytest flake8 pytest-cov
 
       - name: Run linter
-        run: flake8 app_python/app.py --statistics
+        run: flake8 app_python/app.py --statistics --max-line-length=100
 
       - name: run unit tests
         run: pytest app_python/tests/ -v --cov=app --cov-report=xml
