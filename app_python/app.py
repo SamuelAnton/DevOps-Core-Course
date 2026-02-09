@@ -46,10 +46,10 @@ def get_uptime():
     seconds = int(delta.total_seconds())
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
-    human = f"{hours} hour{'s' if hours != 1 else ''}, {minutes} minute{'s' if minutes != 1 else ''}"
+    hum = f"{hours} hour{'s' if hours != 1 else ''}, {minutes} minute{'s' if minutes != 1 else ''}"
     return {
         'seconds': seconds,
-        'human': f"{hours} hour{'s' if hours != 1 else ''}, {minutes} minute{'s' if minutes != 1 else ''}"
+        'human': hum
     }
 
 
@@ -61,7 +61,7 @@ def index():
     # Collect all required information
     system_info = get_system_info()
     uptime_info = get_uptime()
-    
+
     response = {
         "service": {
             "name": "devops-info-service",
@@ -94,7 +94,7 @@ def index():
             {"path": "/health", "method": "GET", "description": "Health check"}
         ]
     }
-    
+
     return jsonify(response)
 
 
@@ -115,6 +115,7 @@ def not_found(error):
         'error': 'Not Found',
         'message': 'Endpoint does not exist'
     }), 404
+
 
 @app.errorhandler(500)
 def internal_error(error):
