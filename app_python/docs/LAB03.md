@@ -30,3 +30,5 @@ tests/test_app.py ...                                                           
 
 ## Versioning Strategy
 I choose "Option A: Semantic Versioning" as I will release my app not so often: for not so big period (many years or month) and there will be not so many updates. So for this course (or for this task) I choose to use semantic versioning.
+
+https://github.com/SamuelAnton/DevOps-Core-Course/pull/3
