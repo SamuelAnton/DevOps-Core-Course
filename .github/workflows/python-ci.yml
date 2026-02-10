@@ -8,7 +8,6 @@ on:
 
 env:
   REGISTRY: docker.io
-  LAB_NUMBER: ${{ github.ref_name != 'main' && github.ref_name[3:] || '0' }}
 
 jobs:
   test:
@@ -73,15 +72,30 @@ jobs:
       - name: Generate version number
         id: version
         run: |
+          # Extract lab number from PR title or branch name
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, extract from source branch (e.g., lab03)
             SOURCE_BRANCH="${{ github.event.pull_request.head.ref }}"
-            LAB_NUMBER="${SOURCE_BRANCH#lab}"
+            
+            # Extract lab number from branch name
+            if [[ "${SOURCE_BRANCH}" =~ ^lab([0-9]+)$ ]]; then
+              LAB_NUMBER="${BASH_REMATCH[1]}"
+            else
+              # If branch name doesn't match pattern, use 0
+              LAB_NUMBER="0"
+            fi
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # For direct push to main, use default
+            LAB_NUMBER="0"
           else
+            # For other branches (shouldn't happen with our if condition)
             LAB_NUMBER="0"
           fi
           
+          # Get attempt number (run number for this workflow)
           ATTEMPT="${{ github.run_number }}"
           
+          # Generate version: 1.<lab>.<attempt>
           VERSION="1.${LAB_NUMBER}.${ATTEMPT}"
           
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
