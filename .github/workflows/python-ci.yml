@@ -1,6 +1,8 @@
 name: Python test and build
 
-on: push
+on:
+  push:
+    branches: [ lab** ]
 
 jobs:
   test:

@@ -29,6 +29,6 @@ tests/test_app.py ...                                                           
 ```
 
 ## Versioning Strategy
-I choose "Option A: Semantic Versioning" as I will release my app not so often: for not so big period (many years or month) and there will be not so many updates. So for this course (or for this task) I choose to use semantic versioning.
+I choose "Option B: Calendar Versioning (CalVer)" with format: "YYYY.MM.DD", so I can easily distinguish each versions: newer date - newer assignment. Also, when I will do lab assignment and make some really small changes in one day - I will save only last version with all fixes and bugs found.
 
 https://github.com/SamuelAnton/DevOps-Core-Course/pull/3
