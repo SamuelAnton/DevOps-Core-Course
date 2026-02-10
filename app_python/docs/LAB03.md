@@ -61,5 +61,5 @@ https://github.com/SamuelAnton/DevOps-Core-Course/actions/runs/21873318288
 ```
 
 ### Speed improvement with caching
-- Before caching: test stage take 10s
+- Before caching: test stage take 10-16s
 - After caching: test stage take 
