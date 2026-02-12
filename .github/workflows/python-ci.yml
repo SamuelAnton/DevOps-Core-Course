@@ -47,7 +47,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          ${{ env.APP_PATH }}
+          cd ${{ env.APP_PATH }}
           snyk test
   
   docker:
