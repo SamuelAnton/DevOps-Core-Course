@@ -44,8 +44,9 @@ See the README file for python app, or:
 
 # Best Practices Implemented
 ## Job Dependencies
-There are 2 steps in CI workflow:
-- Testing that application is working correctly + security check with Snyk
+There are 3 steps in CI workflow:
+- Testing that application is working correctly
+- Security check with Snyk
 - Docker build and push to DockerHub
 
 This means, that if some test failed or security is low, we wouldn't build and push container
