@@ -44,9 +44,11 @@ jobs:
           chmod +x snyk-linux
           sudo mv snyk-linux /usr/local/bin/snyk
       - name: Run Snyk to test project dependencies
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           cd ${{ env.APP_PATH }}
-          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk auth --auth-type=token ${{ secrets.SNYK_TOKEN }}
           snyk test
   
   docker:
