@@ -71,6 +71,7 @@ I use this env variables for repeated values, so I can change them in 1 place, t
 - After caching: test stage take 9s
 
 ## Snyk
+Found that `Flask==3.1.0` is vulnaruble. So I updated to `Flask==3.1.1`.
 
 # Key Decisions
 ## Versioning Strategy
