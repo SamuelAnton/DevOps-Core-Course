@@ -36,21 +36,16 @@ jobs:
       - name: Run unit tests
         run: pytest ${{ env.APP_PATH }}
 
-  security:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Run Snyk
         uses: snyk/actions/python-3.10@master
+        working-directory: ${{ env.APP_PATH }}
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --file=${{ env.APP_PATH }}/requirements.txt --severity-threshold=high
+          args: --severity-threshold=high
   
   docker:
-    needs: security
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
