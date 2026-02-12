@@ -36,12 +36,19 @@ jobs:
       - name: Run unit tests
         run: pytest ${{ env.APP_PATH }}
 
-      - name: Run Snyk
-        uses: snyk/actions/python-3.10@master
+      - name: Install Snyk CLI
+        run: |
+          curl https://downloads.snyk.io/cli/stable/snyk-linux -o snyk-linux
+          curl https://downloads.snyk.io/cli/stable/snyk-linux.sha256 -o snyk.sha256
+          sha256sum -c snyk.sha256
+          chmod +x snyk-linux
+          sudo mv snyk-linux /usr/local/bin/snyk
+      - name: Run Snyk to test project dependencies
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --path=${{ env.APP_PATH }} --severity-threshold=high
+        run: |
+          ${{ env.APP_PATH }}
+          snyk test
   
   docker:
     needs: test
