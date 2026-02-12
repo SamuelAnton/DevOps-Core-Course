@@ -4,6 +4,15 @@ on:
   push:
     branches: [ lab** ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+  DOCKER_IMAGE_NAME: 'devops-info-service'
+  APP_PATH: 'app_python'
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -12,20 +21,27 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          cache-dependency-path: 'app_python/requirements.txt'
+          cache-dependency-path: '${{ env.APP_PATH }}/requirements.txt'
 
       - name: Install dependencies
         run: |
-          pip install -r app_python/requirements.txt
+          pip install -r ${{ env.APP_PATH }}/requirements.txt
           pip install pytest flake8
 
       - name: Run a linter
-        run: flake8 app_python/app.py --max-line-length=100 --statistics
+        run: flake8 ${{ env.APP_PATH }}/app.py --max-line-length=100 --statistics
 
       - name: Run unit tests
-        run: pytest app_python
+        run: pytest ${{ env.APP_PATH }}
+      
+      - name: Run Snyk
+        uses: snyk/actions/python-3.10@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
   
   docker:
     needs: test
@@ -45,8 +61,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./app_python
+          context: ./${{ env.APP_PATH }}
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/devops-info-service:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/devops-info-service:${{ env.VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ env.VERSION }}

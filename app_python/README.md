@@ -107,3 +107,14 @@ The image is available on Docker Hub and can be pulled directly:
 # Pull the latest version
 docker pull <dockerhub-username>/<image-name>:latest
 ```
+
+
+# GitHub Actions Status Badge
+[![Python test and build](https://github.com/SamuelAnton/DevOps-Core-Course/actions/workflows/python-ci.yml/badge.svg?branch=lab03)](https://github.com/SamuelAnton/DevOps-Core-Course/actions/workflows/python-ci.yml)
+
+# Testing
+To test locally run
+```sh
+cd app_python
+pytest .
+```
