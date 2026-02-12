@@ -38,11 +38,10 @@ jobs:
       
       - name: Run Snyk
         uses: snyk/actions/python-3.10@master
-        working-directory: ${{ env.APP_PATH }}
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high
+          args: --file=${{ env.APP_PATH }}/requirements.txt --severity-threshold=high
   
   docker:
     needs: test
