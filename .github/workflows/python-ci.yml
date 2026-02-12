@@ -49,7 +49,7 @@ jobs:
           args: --file=${{ env.APP_PATH }}/requirements.txt --severity-threshold=high
   
   docker:
-    needs: test, security
+    needs: [test , security]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
