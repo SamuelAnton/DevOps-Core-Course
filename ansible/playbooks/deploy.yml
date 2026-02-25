@@ -1,0 +1,32 @@
+---
+- name: Deploy application to web servers
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  vars_files:
+    - ../group_vars/all.yml
+
+  pre_tasks:
+    - name: Display deployment information
+      debug:
+        msg:
+          - "Starting deployment of {{ app_name }}"
+          - "Image: {{ dockerhub_username }}/{{ app_name }}:{{ docker_image_tag }}"
+          - "Target host: {{ inventory_hostname }}"
+
+  roles:
+    - role: app_deploy
+
+  post_tasks:
+    - name: Verify deployment
+      docker_container_info:
+        name: "{{ app_container_name }}"
+      register: final_container
+      
+    - name: Show deployment status
+      debug:
+        msg: 
+          - "Deployment completed successfully!"
+          - "Container status: {{ final_container.container.State.Status }}"
+          - "Container started: {{ final_container.container.State.StartedAt }}"
