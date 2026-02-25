@@ -1,0 +1,12 @@
+---
+- name: restart app container
+  docker_container:
+    name: "{{ app_container_name }}"
+    image: "{{ dockerhub_username }}/{{ app_name }}:{{ docker_image_tag }}"
+    state: started
+    restart: yes
+    restart_policy: "{{ restart_policy }}"
+    ports:
+      - "{{ app_port }}:{{ app_port }}"
+    env: "{{ app_environment }}"
+  become: no

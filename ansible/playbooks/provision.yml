@@ -1,0 +1,14 @@
+---
+- name: Provision web servers with common tools and Docker
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - role: common
+      common_timezone: "Europe/Moscow"
+      tags: [common, always]
+    
+    - role: docker
+      docker_user: "damir"
+      tags: [docker]

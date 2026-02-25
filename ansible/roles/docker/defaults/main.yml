@@ -1,0 +1,19 @@
+---
+# Docker version constraints (use 'latest' or specific version)
+docker_version: "latest"
+docker_compose_version: "latest"
+
+# User to add to docker group
+docker_user: "{{ ansible_user }}"
+
+# Docker repository settings
+docker_repo_url: "https://download.docker.com/linux/ubuntu"
+docker_gpg_key: "https://download.docker.com/linux/ubuntu/gpg"
+
+# Docker packages to install
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
