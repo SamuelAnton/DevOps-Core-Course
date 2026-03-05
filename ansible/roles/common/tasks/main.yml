@@ -1,20 +1,55 @@
 ---
-- name: Update apt cache
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
-  become: yes
+- name: Common role tasks
+  block:
+    - name: Package installation block
+      block:
+        - name: Update apt cache
+          apt:
+            update_cache: yes
+            cache_valid_time: 3600
+          register: apt_update_result
 
-- name: Install essential packages
-  apt:
-    name: "{{ common_packages }}"
-    state: present
-  become: yes
+        - name: Install essential packages
+          apt:
+            name: "{{ common_packages }}"
+            state: present
 
-- name: Set timezone
-  timezone:
-    name: "{{ common_timezone }}"
-  become: yes
-  when: common_timezone is defined
-  notify: 
-    - Restart cron  # Опционально, если хотите рестартить cron после смены таймзоны
+      rescue:
+        - name: Fix apt cache on failure
+          command: apt-get update --fix-missing
+
+        - name: Retry package installation
+          apt:
+            name: "{{ common_packages }}"
+            state: present
+
+      always:
+        - name: Log package installation completion
+          copy:
+            content: "Common packages installed at {{ ansible_date_time.iso8601 }}"
+            dest: /tmp/common_packages_completed.log
+
+      tags:
+        - packages
+      become: yes
+
+    - name: User creation block
+      block:
+        - name: Ensure common user exists
+          user:
+            name: "{{ common_user_name }}"
+            state: present
+            shell: /bin/bash
+            create_home: yes
+      tags:
+        - users
+      become: yes
+
+  always:
+    - name: Log common role completion
+      copy:
+        content: "Common role completed at {{ ansible_date_time.iso8601 }}"
+        dest: /tmp/common_role_completed.log
+      become: yes
+
+  tags: common

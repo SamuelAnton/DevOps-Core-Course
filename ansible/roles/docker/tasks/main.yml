@@ -1,77 +1,33 @@
 ---
-- name: Remove old Docker packages (if any)
-  apt:
-    name:
-      - docker
-      - docker-engine
-      - docker.io
-      - containerd
-      - runc
-    state: absent
-  become: yes
+- name: Docker role tasks
+  block:
+    - name: Docker installation block
+      block:
+        - name: Include Docker installation tasks
+          include_tasks: install.yml
+      rescue:
+        - name: Wait 10 seconds before retry
+          wait_for:
+            timeout: 10
+        - name: Retry Docker installation
+          include_tasks: install.yml
+      tags: docker_install
+      become: yes
 
-- name: Install required system packages
-  apt:
-    name:
-      - apt-transport-https
-      - ca-certificates
-      - curl
-      - gnupg
-      - lsb-release
-    state: present
-    update_cache: yes
-  become: yes
+    - name: Docker configuration block
+      block:
+        - name: Include Docker configuration tasks
+          include_tasks: config.yml
+      tags: docker_config
+      become: yes
 
-- name: Add Docker GPG key
-  apt_key:
-    url: "{{ docker_gpg_key }}"
-    state: present
-  become: yes
+  always:
+    - name: Ensure Docker service is enabled and started
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+      ignore_errors: yes   # in case Docker is not installed
 
-- name: Add Docker repository
-  apt_repository:
-    repo: "deb [arch=amd64] {{ docker_repo_url }} {{ ansible_distribution_release }} stable"
-    state: present
-    update_cache: yes
-  become: yes
-  register: docker_repo_added
-
-- name: Install Docker packages
-  apt:
-    name: "{{ docker_packages }}"
-    state: "{{ 'latest' if docker_version == 'latest' else 'present' }}"
-    update_cache: yes
-  become: yes
-  notify: restart docker
-
-- name: Ensure Docker service is running and enabled
-  systemd:
-    name: docker
-    state: started
-    enabled: yes
-  become: yes
-
-- name: Add user to docker group
-  user:
-    name: "{{ docker_user }}"
-    groups: docker
-    append: yes
-  become: yes
-  notify: restart docker
-
-- name: Install Python Docker module for Ansible
-  pip:
-    name:
-      - docker
-      - docker-compose
-    state: present
-  become: yes
-
-- name: Verify Docker installation
-  command: docker --version
-  register: docker_version_check
-  changed_when: false
-
-- name: Display Docker version
-  debug:
-    msg: "Docker installed: {{ docker_version_check.stdout }}"
+  tags: docker

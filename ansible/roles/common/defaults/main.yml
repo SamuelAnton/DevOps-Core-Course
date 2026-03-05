@@ -20,3 +20,6 @@ common_packages:
 
 # Default timezone
 common_timezone: "UTC"
+
+# User to create (for demonstration)
+common_user_name: appuser

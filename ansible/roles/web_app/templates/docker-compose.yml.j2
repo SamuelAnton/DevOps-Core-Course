@@ -1,0 +1,25 @@
+---
+
+services:
+  {{ app_name }}:
+    image: "{{ dockerhub_username }}/{{ app_name }}:latest"
+    container_name: "{{ app_name }}-compose"
+    ports:
+      - "{{ app_port }}:{{ app_internal_port | default(app_port) }}"
+    environment:
+      APP_NAME: "{{ app_name }}"
+      APP_PORT: "{{ app_internal_port | default(app_port) }}"
+      ENVIRONMENT: "{{ app_environment.ENVIRONMENT | default('production') }}"
+
+    restart: "{{ restart_policy | default('unless-stopped') }}"
+    networks:
+      - app_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  app_network:
+    driver: bridge
