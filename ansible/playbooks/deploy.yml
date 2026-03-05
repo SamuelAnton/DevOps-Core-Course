@@ -16,7 +16,7 @@
           - "Target host: {{ inventory_hostname }}"
 
   roles:
-    - role: app_deploy
+    - role: web_app
 
   post_tasks:
     - name: Verify deployment

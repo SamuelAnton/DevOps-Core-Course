@@ -1,0 +1,40 @@
+---
+- name: Remove old Docker packages (if any)
+  apt:
+    name:
+      - docker
+      - docker-engine
+      - docker.io
+      - containerd
+      - runc
+    state: absent
+
+- name: Install required system packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: yes
+
+- name: Add Docker GPG key
+  apt_key:
+    url: "{{ docker_gpg_key }}"
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] {{ docker_repo_url }} {{ ansible_distribution_release }} stable"
+    state: present
+    update_cache: yes
+  register: docker_repo_added
+
+- name: Install Docker packages
+  apt:
+    name: "{{ docker_packages }}"
+    state: "{{ 'latest' if docker_version == 'latest' else 'present' }}"
+    update_cache: yes
+  notify: restart docker

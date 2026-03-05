@@ -1,0 +1,42 @@
+---
+- name: Wipe web application
+  block:
+    - name: Stop and remove containers with Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ compose_project_dir | default('/opt/' + app_name) }}"
+        state: absent
+        remove_orphans: yes
+        remove_volumes: yes   # удалить также тома (если есть)
+      become: no
+      ignore_errors: yes
+      register: compose_down
+
+    - name: Remove docker-compose.yml file
+      file:
+        path: "{{ compose_project_dir | default('/opt/' + app_name) }}/docker-compose.yml"
+        state: absent
+      become: yes
+      ignore_errors: yes
+
+    - name: Remove application directory
+      file:
+        path: "{{ compose_project_dir | default('/opt/' + app_name) }}"
+        state: absent
+      become: yes
+      ignore_errors: yes
+
+    - name: (Optional) Remove Docker images
+      docker_image:
+        name: "{{ dockerhub_username }}/{{ app_name }}:{{ docker_tag | default('latest') }}"
+        state: absent
+      become: no
+      ignore_errors: yes
+      when: web_app_remove_images | default(false) | bool   # дополнительная опция
+
+    - name: Log wipe completion
+      debug:
+        msg: "Application {{ app_name }} wiped successfully from {{ compose_project_dir | default('/opt/' + app_name) }}"
+
+  when: web_app_wipe | default(false) | bool
+  tags:
+    - web_app_wipe

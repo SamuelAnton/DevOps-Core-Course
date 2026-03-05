@@ -2,10 +2,14 @@
 # Application defaults
 app_name: devops-info-service
 app_port: "5000"
+app_internal_port: "5000"
 app_container_name: "{{ app_name }}"
-docker_image_tag: latest
+docker_tag: latest
+dockerhub_username: your_dockerhub_username
 
 # Container settings
+docker_compose_version: "3.8"
+compose_project_dir: "/opt/{{ app_name }}"
 restart_policy: unless-stopped
 container_state: started
 
@@ -19,3 +23,8 @@ app_environment:
   APP_NAME: "{{ app_name }}"
   APP_PORT: "{{ app_port }}"
   ENVIRONMENT: production
+
+app_secret_key: "insecure-dev-key"
+
+# Wipe Logic Control
+web_app_wipe: false

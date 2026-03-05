@@ -1,0 +1,5 @@
+---
+dependencies:
+  - role: docker
+    # No need to pass vars; docker role uses its own defaults
+    # This ensures Docker is installed before we try to deploy containers.
