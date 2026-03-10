@@ -23,6 +23,7 @@ class JSONFormatter(logging.Formatter):
             log_obj["exception"] = self.formatException(record.exc_info)
         return json.dumps(log_obj)
 
+
 app = Flask(__name__)
 
 # Configuration
@@ -44,6 +45,7 @@ logger.setLevel(logging.INFO)
 @app.before_request
 def log_request_info():
     logger.info(f"Request: {request.method} {request.path} from {request.remote_addr}")
+
 
 @app.after_request
 def log_response_info(response):
