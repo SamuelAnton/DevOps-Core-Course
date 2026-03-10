@@ -62,6 +62,25 @@ type HealthResponse struct {
 	UptimeSeconds int    `json:"uptime_seconds"`
 }
 
+// Wrapper for capturing status code
+type statusLoggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func NewLoggingResponseWriter(w http.ResponseWriter) *statusLoggingResponseWriter {
+	return &statusLoggingResponseWriter{w, http.StatusOK}
+}
+
+func (lrw *statusLoggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
+}
+
+func (lrw *statusLoggingResponseWriter) Write(b []byte) (int, error) {
+	return lrw.ResponseWriter.Write(b)
+}
+
 // Application start time
 var startTime = time.Now()
 
@@ -107,6 +126,19 @@ func plural(count int) string {
 		return ""
 	}
 	return "s"
+}
+
+// Middleware for logs
+func logsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Request: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
+
+		lrw := NewLoggingResponseWriter(w)
+
+		next.ServeHTTP(lrw, r)
+
+		log.Printf("Request status: %d", lrw.statusCode)
+	})
 }
 
 // Main handler
@@ -181,9 +213,11 @@ func main() {
 	port := getEnv("PORT", "5000")
 	debug := getEnv("DEBUG", "false")
 
+	// Get middlewares
+
 	// Set up routes
-	http.HandleFunc("/", mainHandler)
-	http.HandleFunc("/health", healthHandler)
+	http.Handle("/", logsMiddleware(http.HandlerFunc(mainHandler)))
+	http.Handle("/health", logsMiddleware(http.HandlerFunc(healthHandler)))
 
 	// Log startup information
 	log.Printf("Starting DevOps Info Service (Go)...")

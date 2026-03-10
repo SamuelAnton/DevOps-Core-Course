@@ -1,0 +1,29 @@
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb        # 🚀 New fast store
+      object_store: filesystem
+      schema: v13        # 📊 Latest schema
+      index:
+        prefix: index_
+        period: 24h
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+
+limits_config:
+  retention_period: 168h  # 🗓️ 7 days

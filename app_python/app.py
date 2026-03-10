@@ -8,6 +8,20 @@ import platform
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 import logging
+import json
+
+
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        log_obj = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "logger": record.name,
+        }
+        if record.exc_info:
+            log_obj["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_obj)
 
 app = Flask(__name__)
 
@@ -20,11 +34,21 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 start_time = datetime.now()
 
 # Logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+handler.setFormatter(JSONFormatter())
+logger = logging.getLogger()
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+
+@app.before_request
+def log_request_info():
+    logger.info(f"Request: {request.method} {request.path} from {request.remote_addr}")
+
+@app.after_request
+def log_response_info(response):
+    logger.info(f"Request status: {response.status_code}")
+    return response
 
 
 # Function that collects system info
@@ -111,6 +135,7 @@ def health():
 # Error Handling
 @app.errorhandler(404)
 def not_found(error):
+    logger.error("Not found error occured: {error}")
     return jsonify({
         'error': 'Not Found',
         'message': 'Endpoint does not exist'
@@ -119,6 +144,7 @@ def not_found(error):
 
 @app.errorhandler(500)
 def internal_error(error):
+    logger.error("Internal error occured: {error}")
     return jsonify({
         'error': 'Internal Server Error',
         'message': 'An unexpected error occurred'
