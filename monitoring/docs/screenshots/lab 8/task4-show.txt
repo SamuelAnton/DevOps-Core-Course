@@ -1,0 +1,8 @@
+$ docker compose ps
+NAME                      IMAGE                                        COMMAND                  SERVICE             CREATED             STATUS                            PORTS
+monitoring-app-go-1       damirsadykov/devops-info-service-go:latest   "./myapp"                app-go              9 seconds ago       Up 7 seconds (health: starting)   0.0.0.0:8001->5000/tcp, :::8001->5000/tcp
+monitoring-app-python-1   damirsadykov/devops-info-service:latest      "python app.py"          app-python          9 seconds ago       Up 7 seconds (health: starting)   0.0.0.0:8000->5000/tcp, :::8000->5000/tcp
+monitoring-grafana-1      grafana/grafana:12.3.1                       "/run.sh"                grafana             9 seconds ago       Up 7 seconds (healthy)            0.0.0.0:3000->3000/tcp, :::3000->3000/tcp
+monitoring-loki-1         grafana/loki:3.0.0                           "/usr/bin/loki -conf…"   loki                9 seconds ago       Up 7 seconds (health: starting)   0.0.0.0:3100->3100/tcp, :::3100->3100/tcp
+monitoring-prometheus-1   prom/prometheus:v3.9.0                       "/bin/prometheus --c…"   prometheus          9 seconds ago       Up 7 seconds (health: starting)   0.0.0.0:9090->9090/tcp, :::9090->9090/tcp
+monitoring-promtail-1     grafana/promtail:3.0.0                       "/usr/bin/promtail -…"   promtail            9 seconds ago       Up 7 seconds                      0.0.0.0:9080->9080/tcp, :::9080->9080/tcp

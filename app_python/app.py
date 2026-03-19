@@ -5,10 +5,12 @@ Main application module
 import os
 import socket
 import platform
-from datetime import datetime, timezone
-from flask import Flask, jsonify, request
+import time
 import logging
 import json
+from datetime import datetime, timezone
+from flask import Flask, jsonify, request, Response
+from prometheus_client import Counter, Histogram, Gauge, generate_latest
 
 
 class JSONFormatter(logging.Formatter):
@@ -41,16 +43,64 @@ logger = logging.getLogger()
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
+# Metrics
+http_requests_total = Counter(
+    'http_requests_total',
+    'Total HTTP requests',
+    ['method', 'endpoint', 'status']
+)
+http_request_duration_seconds = Histogram(
+    'http_request_duration_seconds',
+    'HTTP request duration',
+    ['method', 'endpoint']
+)
+http_requests_in_progress = Gauge(
+    'http_requests_in_progress',
+    'HTTP requests currently being processed'
+)
+system_info_collection_seconds = Histogram(
+    'system_info_collection_seconds',
+    'Time spent collecting system information'
+)
+
 
 @app.before_request
-def log_request_info():
+def before_request():
+    request._start_time = time.time()
+    http_requests_in_progress.inc()
     logger.info(f"Request: {request.method} {request.path} from {request.remote_addr}")
 
 
 @app.after_request
-def log_response_info(response):
+def after_request(response):
+    duration = time.time() - request._start_time
+
+    # Observe histogram with labels
+    http_request_duration_seconds.labels(
+        method=request.method,
+        endpoint=request.path
+    ).observe(duration)
+
+    # Increment counter with labels (status as string)
+    http_requests_total.labels(
+        method=request.method,
+        endpoint=request.path,
+        status=str(response.status_code)
+    ).inc()
+
+    # Decrement in-progress gauge
+    http_requests_in_progress.dec()
+
     logger.info(f"Request status: {response.status_code}")
     return response
+
+
+@app.teardown_request
+def teardown_request(exception=None):
+    """Ensure gauge is decremented even if an exception occurs."""
+    if exception is not None:
+        http_requests_in_progress.dec()
+        logger.error(f"Request failed: {exception}")
 
 
 # Function that collects system info
@@ -117,7 +167,8 @@ def index():
         },
         "endpoints": [
             {"path": "/", "method": "GET", "description": "Service information"},
-            {"path": "/health", "method": "GET", "description": "Health check"}
+            {"path": "/health", "method": "GET", "description": "Health check"},
+            {"path": "/metrics", "method": "GET", "description": "Metrics gathering"}
         ]
     }
 
@@ -132,6 +183,11 @@ def health():
         'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
         'uptime_seconds': get_uptime()['seconds']
     })
+
+
+@app.route('/metrics')
+def metrics():
+    return Response(generate_latest(), mimetype='text/plain')
 
 
 # Error Handling

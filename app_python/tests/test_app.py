@@ -58,8 +58,8 @@ def test_default_endpoint():
 
     endpoints = data["endpoints"]
     assert isinstance(endpoints, list)
-    assert len(endpoints) == 2
-    for i in range(2):
+    assert len(endpoints) == 3
+    for i in range(3):
         assert "path" in endpoints[i]
         assert "method" in endpoints[i]
         assert "description" in endpoints[i]
