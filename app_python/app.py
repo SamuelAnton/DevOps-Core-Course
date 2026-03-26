@@ -190,6 +190,11 @@ def metrics():
     return Response(generate_latest(), mimetype='text/plain')
 
 
+@app.route('/ready')
+def ready():
+    return jsonify({'status': 'ready'})
+
+
 # Error Handling
 @app.errorhandler(404)
 def not_found(error):
