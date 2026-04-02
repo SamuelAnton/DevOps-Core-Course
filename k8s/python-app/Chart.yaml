@@ -1,0 +1,19 @@
+apiVersion: v2
+name: python-app
+description: DevOps Info Service - Python Flask application
+type: application
+version: 1.0.0
+appVersion: "1.3.0"
+
+keywords:
+  - python
+  - flask
+  - devops
+  - monitoring
+
+maintainers:
+  - name: Damir Sadykov
+    email: d.sadykov@innopolis.university
+
+sources:
+  - https://github.com/SamuelAnton/DevOps-Core-Course
