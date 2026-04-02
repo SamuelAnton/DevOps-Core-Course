@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ include "python-app.fullname" . }}-pre-install"
+  labels:
+    {{- include "python-app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: pre-install-task
+        image: busybox
+        command:
+          - sh
+          - -c
+          - |
+            echo "Pre-install hook running at $(date)"
+            echo "You could run database migrations, validations, etc. here."
+            echo "Pre-install completed successfully."
+            exit 0

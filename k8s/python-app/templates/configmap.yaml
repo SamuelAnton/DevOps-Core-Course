@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    {{- include "python-app.labels" . | nindent 4 }}
+data:
+  app.properties: |
+    environment={{ .Values.environment | default "dev" }}
+    log_level=info
