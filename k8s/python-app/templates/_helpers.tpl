@@ -5,6 +5,35 @@ Expand the name of the chart.
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{- define "python-app.secretName" -}}
+{{- printf "%s-secret" (include "python-app.fullname" .) }}
+{{- end }}
+
+{{/*
+Environment variables common to the application.
+*/}}
+{{- define "python-app.commonEnv" -}}
+- name: PORT
+  value: {{ .Values.env.port | default "5000" | quote }}
+- name: HOST
+  value: {{ .Values.env.host | default "0.0.0.0" | quote }}
+- name: DEBUG
+  value: {{ .Values.env.debug | default "false" | quote }}
+{{- end -}}
+
+{{- define "python-app.secretEnv" -}}
+- name: API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "python-app.secretName" . }}
+      key: API_KEY
+- name: DB_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "python-app.secretName" . }}
+      key: DB_PASSWORD
+{{- end -}}
+
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
