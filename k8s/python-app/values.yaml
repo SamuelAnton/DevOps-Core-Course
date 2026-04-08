@@ -51,3 +51,11 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 3
   failureThreshold: 3
+
+secrets:
+  apiKey: "dev-key"
+  dbPassword: "dev-db-pass"
+  adminPassword: "dev-admin-pass"
+
+serviceAccount:
+  name: my-python-app-sa
