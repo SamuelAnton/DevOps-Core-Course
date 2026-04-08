@@ -445,3 +445,46 @@ env:
 **Good luck!** 🔐
 
 > **Remember:** Never commit real secrets to version control. Use placeholder values and inject real secrets at deployment time. In production, always use an external secret manager like Vault.
+
+
+## Bonus: Vault Agent Templates & Helm Helpers
+
+### Template Annotation Configuration
+
+We used a custom template to render the secret as a `.env` file:
+
+```yaml
+vault.hashicorp.com/agent-inject-template-config: |
+  {{- with secret "secret/myapp/config" -}}
+  USERNAME={{ .Data.data.username }}
+  PASSWORD={{ .Data.data.password }}
+  {{- end -}}
+```
+
+#### Rendered secret file content (inside the pod at /vault/secrets/config):
+```
+USERNAME=admin
+PASSWORD=secret123
+```
+
+### Dynamic Secret Rotation
+Vault Agent automatically renews leases and updates the secret file when the source secret changes in Vault. The default refresh interval is 60 seconds. To enable hot‑reloading, applications can watch the file for changes (e.g., using pyinotify in Python) or use the agent-inject-command annotation to send a reload signal.
+
+### Named Templates for Environment Variables
+We defined reusable environment blocks in _helpers.tpl:
+```
+{{- define "python-app.commonEnv" -}}
+- name: PORT
+  value: {{ .Values.env.port | default "5000" | quote }}
+...
+{{- end -}}
+```
+
+Then applied them in deployment.yaml:
+```
+env:
+  {{- include "python-app.commonEnv" . | nindent 10 }}
+  {{- include "python-app.secretEnv" . | nindent 10 }}
+```
+
+Benefits: Centralised configuration, easier maintenance, and adherence to the DRY principle.
