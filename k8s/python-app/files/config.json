@@ -1,0 +1,9 @@
+{
+  "app_name": "DevOps Info Service",
+  "environment": "development",
+  "features": {
+    "enable_metrics": true,
+    "enable_debug_endpoints": false
+  },
+  "max_visits_display": 1000
+}

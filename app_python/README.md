@@ -74,6 +74,22 @@ HOST=127.0.0.1 PORT=3000 python app.py
 }
 ```
 
+## `GET /ready` - Health check
+### Example Response:
+```
+{
+  "status": "ready",
+}
+```
+
+## `GET /visits` - Health check
+### Example Response:
+```
+{
+  "visits": 1,
+}
+```
+
 # Configuration 
 | Variable name | Basic value | Description |
 |----------|--------|-------------|

@@ -8,6 +8,7 @@ import platform
 import time
 import logging
 import json
+import threading
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request, Response
 from prometheus_client import Counter, Histogram, Gauge, generate_latest
@@ -62,6 +63,43 @@ system_info_collection_seconds = Histogram(
     'system_info_collection_seconds',
     'Time spent collecting system information'
 )
+
+# Path to the counter file
+DATA_DIR = "/tmp/data"
+VISITS_FILE = os.path.join(DATA_DIR, "visits.json")
+
+# Ensure the data directory exists
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# Lock for thread-safe file access
+counter_lock = threading.Lock()
+
+
+def read_counter():
+    """Read the current counter value from the file."""
+    if not os.path.exists(VISITS_FILE):
+        return 0
+    try:
+        with open(VISITS_FILE, 'r') as f:
+            data = json.load(f)
+            return data.get("visits", 0)
+    except (json.JSONDecodeError, IOError):
+        return 0
+
+
+def write_counter(value):
+    """Write the counter value to the file."""
+    with open(VISITS_FILE, 'w') as f:
+        json.dump({"visits": value}, f)
+
+
+def increment_counter():
+    """Increment the counter and return the new value."""
+    with counter_lock:
+        current = read_counter()
+        current += 1
+        write_counter(current)
+        return current
 
 
 @app.before_request
@@ -172,6 +210,8 @@ def index():
         ]
     }
 
+    increment_counter()
+
     return jsonify(response)
 
 
@@ -193,6 +233,12 @@ def metrics():
 @app.route('/ready')
 def ready():
     return jsonify({'status': 'ready'})
+
+
+@app.route('/visits')
+def visits():
+    count = read_counter()
+    return jsonify({"visits": count})
 
 
 # Error Handling

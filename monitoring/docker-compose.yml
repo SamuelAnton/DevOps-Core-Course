@@ -97,6 +97,8 @@ services:
         reservations:
           cpus: '0.5'
           memory: 128M
+    volumes:
+      - ./data:/data
 
   app-go:
     image: damirsadykov/devops-info-service-go:latest

@@ -32,36 +32,43 @@ spec:
           {{ "{{" }}- end -{{ "}}" }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: {{ include "python-app.fullname" . }}-data
+        - name: config-volume
+          configMap:
+            name: {{ include "python-app.fullname" . }}-config
+      securityContext:
+        fsGroup: 1000 
       containers:
-      - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-        env:
-        - name: API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "python-app.secretName" . }}
-              key: API_KEY
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "python-app.secretName" . }}
-              key: DB_PASSWORD
-        - name: ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "python-app.secretName" . }}
-              key: ADMIN_PASSWORD
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - containerPort: {{ .Values.service.targetPort }}
-          name: http
-          protocol: TCP
-        env:
-          {{- include "python-app.commonEnv" . | nindent 10 }}
-          {{- include "python-app.secretEnv" . | nindent 10 }}
-        resources:
-          {{- toYaml .Values.resources | nindent 10 }}
-        livenessProbe:
-          {{- toYaml .Values.livenessProbe | nindent 10 }}
-        readinessProbe:
-          {{- toYaml .Values.readinessProbe | nindent 10 }}
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+              name: http
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "python-app.fullname" . }}-env
+          env:
+            - name: PORT
+              value: "5000"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: DEBUG
+              value: "false"
+            {{- include "python-app.secretEnv" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+            - name: config-volume
+              mountPath: /config
+              readOnly: true
