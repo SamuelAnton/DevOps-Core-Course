@@ -59,3 +59,16 @@ secrets:
 
 serviceAccount:
   name: my-python-app-sa
+
+environment: "development"
+logLevel: "info"
+features:
+  metrics: true
+  debug: false
+
+fullnameOverride: "my-python-app"
+
+persistence:
+  enabled: true
+  size: 100Mi
+  storageClass: ""  # Use default storage class (works in Minikube)

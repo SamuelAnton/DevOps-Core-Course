@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "python-app.fullname" . }}-env
+  labels:
+    {{- include "python-app.labels" . | nindent 4 }}
+data:
+  APP_ENV: {{ .Values.environment | default "dev" | quote }}
+  LOG_LEVEL: {{ .Values.logLevel | default "info" | quote }}
+  FEATURE_METRICS: {{ .Values.features.metrics | default "true" | quote }}
+  FEATURE_DEBUG: {{ .Values.features.debug | default "false" | quote }}
