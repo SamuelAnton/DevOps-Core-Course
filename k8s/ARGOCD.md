@@ -277,3 +277,31 @@ $ kubectl describe deployment python-app-python-app -n dev | grep test-drift
 
 ## 5. Screenshots
 In the 'screenshot/lab 13/' directory
+
+## 6. Bonus Task
+
+### Benefits of ApplicationSet over Individual Applications
+
+- **DRY** – Single definition for multiple environments/clusters.
+- **Scalable** – Adding a new environment (e.g., `staging`) only requires adding one element to the list.
+- **Consistency** – All generated applications share the same source and destination settings.
+- **Automation** – Can integrate with Git directories or cluster discovery.
+
+### When to Use Which Generator
+
+| Generator | Use Case |
+|-----------|----------|
+| **List** | Small, fixed set of environments or clusters. Simple and explicit. |
+| **Git** | Many applications in a monorepo – auto‑discover based on directory structure. |
+| **Cluster** | Deploy to multiple Kubernetes clusters (e.g., dev/staging/prod clusters). |
+| **Matrix** | Combine two generators (e.g., cluster × environment) for many combinations. |
+| **Merge** | Merge outputs from multiple generators. |
+
+### Scaling Considerations
+
+- ApplicationSet can generate thousands of Applications, but each Application creates its own Argo CD resource overhead.
+- Use `syncPolicy` carefully – auto‑sync for many apps can cause high API load.
+- Consider using `preserveResourcesOnDeletion` to keep resources when deleting an ApplicationSet.
+
+### ApplicationSet manifest
+Can be found in `k8s/agrocd/applicationset.yaml`
