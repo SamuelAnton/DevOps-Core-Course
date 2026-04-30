@@ -38,17 +38,7 @@ spec:
         readinessProbe:
           {{- toYaml .Values.readinessProbe | nindent 10 }}
   strategy:
-    canary:
-      steps:
-        - setWeight: 20
-        - pause: {}
-        - analysis:
-            templates:
-              - templateName: {{ include "python-app.fullname" . }}-health-check
-        - setWeight: 40
-        - pause: { duration: 30s }
-        - setWeight: 60
-        - pause: { duration: 30s }
-        - setWeight: 80
-        - pause: { duration: 30s }
-        - setWeight: 100
+    blueGreen:
+      activeService: {{ include "python-app.fullname" . }}
+      previewService: {{ include "python-app.fullname" . }}-preview
+      autoPromotionEnabled: false

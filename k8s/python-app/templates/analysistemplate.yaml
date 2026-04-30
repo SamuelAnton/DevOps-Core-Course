@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: {{ include "python-app.fullname" . }}-health-check
+  labels:
+    {{- include "python-app.labels" . | nindent 4 }}
+spec:
+  metrics:
+    - name: health-check
+      provider:
+        web:
+          url: "http://{{ include "python-app.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/health"
+          jsonPath: "{$.status}"
+      successCondition: result == "healthy"
+      failureLimit: 1
+      interval: 5s
+      count: 3

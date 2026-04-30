@@ -217,4 +217,21 @@ $ kubectl argo rollouts undo my-python-app-python-app
   ```
 - **ReplicaSets**: Compare `rollouts-pod-template-hash` labels to see which ReplicaSet is active/preview.
 
----
+
+## Bonus: Automated Analysis
+
+### AnalysisTemplate Definition
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+```
+
+### Integration with Canary
+The analysis step runs after the 20% manual promotion. It queries /health three times (5s interval). If any measurement fails (status != "healthy"), the rollout aborts.
+
+### Success Criteria
+- Success: status == "healthy" for all 3 measurements.
+- Failure limit: 1 failure → abort.
+
+### Screenshots - inside `screenshots/` folder
