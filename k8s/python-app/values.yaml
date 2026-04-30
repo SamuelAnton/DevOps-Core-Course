@@ -1,4 +1,4 @@
-replicaCount: 5
+replicaCount: 3
 
 strategy:
   type: RollingUpdate
@@ -8,7 +8,7 @@ strategy:
 
 image:
   repository: damirsadykov/devops-info-service
-  tag: "latest"
+  tag: "2026.04.21"
   pullPolicy: Always
 
 service:
